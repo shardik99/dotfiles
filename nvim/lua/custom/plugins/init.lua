@@ -25,7 +25,7 @@ return {
     branch = 'harpoon2',
     dependencies = {
       'nvim-lua/plenary.nvim',
-      'nvim-telescop/telescope.nvim',
+      'nvim-telescope/telescope.nvim',
     },
     config = function()
       local harpoon = require 'harpoon'
@@ -73,9 +73,15 @@ return {
   },
   {
     'tpope/vim-fugitive',
-    dependencies = {},
     config = function()
       vim.keymap.set('n', '<leader>gs', vim.cmd.Git)
+    end,
+  },
+  {
+    'm4xshen/autoclose.nvim',
+    config = function()
+      local autoclose = require 'autoclose'
+      autoclose.setup()
     end,
   },
 }
