@@ -229,6 +229,12 @@ require('lazy').setup {
     event = 'VeryLazy',
     branch = '0.1.x',
     dependencies = {
+      {
+        "nvim-telescope/telescope-live-grep-args.nvim" ,
+        -- This will not install any breaking changes.
+        -- For major updates, this must be adjusted manually.
+        version = "^1.0.0",
+      },
       'nvim-lua/plenary.nvim',
       { -- If encountering errors, see telescope-fzf-native README for install instructions
         'nvim-telescope/telescope-fzf-native.nvim',
@@ -253,6 +259,7 @@ require('lazy').setup {
     config = function()
       -- [[ Configure Telescope ]]
       -- See `:help telescope` and `:help telescope.setup()`
+      require("telescope").load_extension("live_grep_args")
       require('telescope').setup {
         -- You can put your default mappings / updates / etc. in here
         --  All the info you're looking for is in `:help telescope.setup()`
@@ -275,21 +282,37 @@ require('lazy').setup {
       pcall(require('telescope').load_extension, 'ui-select')
 
       -- See `:help telescope.builtin`
+      local telescope = require 'telescope'
       local builtin = require 'telescope.builtin'
+      local grep = telescope.extensions.live_grep_args
       vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
       vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
-      vim.keymap.set('n', '<leader>pf', builtin.find_files, { desc = '[P]roject [F]iles' })
+      vim.keymap.set('n', '<leader>spf', builtin.find_files, { desc = '[S]earch [P]roject [F]iles' })
       vim.keymap.set('n', '<leader>sf', function ()
-        local current_buf = vim.api.nvim_get_current_buf()
-        local curdir = vim.api.nvim_buf_get_var(current_buf, 'netrw_curdir')
+        local current_buf = vim.api.nvim_get_current_buf() local curdir = vim.api.nvim_buf_get_var(current_buf, 'netrw_curdir')
         if curdir == nil then
           curdir = vim.fn.getcwd()
         end
          builtin.find_files({ cwd = curdir })
       end, { desc = '[S]earch [F]iles' })
+      vim.keymap.set('n', '<leader>sprf', function ()
+        local search_dirs = { vim.fn.getcwd()..'/halon-src/hpe-routing',vim.fn.getcwd()..'/halon-src/hpe-metaswitch/code' }
+         builtin.find_files({ search_dirs = search_dirs })
+      end, { desc = '[S]earch [P]roject [R]outing [F]iles' })
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
       vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
-      vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
+      vim.keymap.set('n', '<leader>sg', grep.live_grep_args, { desc = '[S]earch by [G]rep' })
+      vim.keymap.set('n', '<leader>gpf', function ()
+        local current_buf = vim.api.nvim_get_current_buf() local curdir = vim.api.nvim_buf_get_var(current_buf, 'netrw_curdir')
+        if curdir == nil then
+          curdir = vim.fn.getcwd()
+        end
+         grep.live_grep_args({ cwd = curdir })
+      end, { desc = '[G]rep [P]roject [F]iles' })
+      vim.keymap.set('n', '<leader>gprf', function ()
+        local search_dirs = { vim.fn.getcwd()..'/halon-src/hpe-routing',vim.fn.getcwd()..'/halon-src/hpe-metaswitch/code' }
+         grep.live_grep_args({ search_dirs = search_dirs })
+      end, { desc = '[G]rep [P]roject [R]outing [F]iles' })
       vim.keymap.set('n', '<leader>gf', builtin.git_files, { desc = 'Search [git] [f]iles' })
       vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
@@ -302,8 +325,7 @@ require('lazy').setup {
       vim.keymap.set('n', '<leader>/', function()
         -- You can pass additional configuration to telescope to change theme, layout, etc.
         builtin.current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
-          winblend = 10,
-          previewer = true,
+          winblend = 10, previewer = true,
         })
       end, { desc = '[/] Fuzzily search in current buffer' })
  ]]
@@ -432,7 +454,11 @@ require('lazy').setup {
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
-        -- clangd = {},
+        clangd = {
+          handlers = {
+            ['textDocument/publishDiagnostics'] = function() end 
+          }
+        },
         -- gopls = {},
         -- pyright = {},
         -- rust_analyzer = {},
@@ -505,7 +531,7 @@ require('lazy').setup {
     end,
   },
 
-  { -- Autoformat
+  --[[ { -- Autoformat
     'stevearc/conform.nvim',
     opts = {
       notify_on_error = false,
@@ -523,7 +549,7 @@ require('lazy').setup {
         -- javascript = { { "prettierd", "prettier" } },
       },
     },
-  },
+  }, ]]
 
   { -- Autocompletion
     'hrsh7th/nvim-cmp',
