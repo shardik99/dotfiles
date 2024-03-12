@@ -29,4 +29,5 @@ export EDITOR='vi'
 source /usr/share/fzf/key-bindings.zsh
 source /usr/share/fzf/completion.zsh
 
-bindkey -s ^f "~/.config/bin/tmux-sessionizer\n"
+bindkey -s '^f' '~/.config/bin/tmux-sessionizer\n'
+bindkey -s '^a' '~/.config/bin/tmux-sessionizer home\n'
